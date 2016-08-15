@@ -1,5 +1,9 @@
 module.exports = function(bot) {
 	return {
+		numbersOnly: function(number) {
+			return number.replace(/[^0-9]/g, "");
+		},
+
 		formatNumber: function(number) {
 			return number.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
 		},

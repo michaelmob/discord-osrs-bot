@@ -4,6 +4,7 @@ module.exports = function(request) {
 		"magic", "cooking", "woodcutting", "fletching", "fishing", "firemaking",
 		"crafting", "smithing", "mining", "herblore", "agility", "thieving",
 		"slayer", "farming", "runecrafting", "hunter", "construction",
+		-1, -1, -1, "combat"
 	];
 
 	String.prototype.title = function() {
@@ -11,49 +12,30 @@ module.exports = function(request) {
 	}
 
 	return {
-		get: function(args, callback) {
-			var username = this._findUsername(args);
-			var wantedSkills = args.slice(username.split(" ").length);
-
+		getEx: function(playerName, wantedSkills, callback) {
+			// Show combat skills if none were specified
 			if(wantedSkills.length < 1) {
 				wantedSkills = [
 					"attack", "defence", "strength", "hitpoints",
 					"ranged", "prayer", "magic", "combat", "total"
 				];
 			}
-
+			
 			_this = this;
 			request.get(
 				"http://services.runescape.com/m=hiscore_oldschool/" + 
-					"index_lite.ws?player=" + username.replace(/\ /g, "+"),
+					"index_lite.ws?player=" + playerName.replace(/\ /g, "+"),
 
 				function (error, response, body) {
 					if(response.statusCode == 404 || response.statusCode == 500)
-						return callback(false);
+						return callback(playerName, false);
 
-					var tokens = body.split("\n");
+					// Split apart skills by line; Rank/Level/EXP
+					var tokens = body.trim().split("\n");
 
-					// Skills
+					// Add combat to tokens; 0,Level,0
+					tokens.push("-1," + _this.getCombat(tokens) + ",-1");
 					var skills = { };
-
-					// Combat
-					if(wantedSkills.indexOf("combat") > 0) {
-						var skillLevel = function(skill) {
-							return parseInt(
-								tokens[skillsList.indexOf(skill)].split(",")[1]
-							);
-						};
-
-						skills["combat"] = [_this.calcCombat(
-							skillLevel("attack"),
-							skillLevel("defence"),
-							skillLevel("strength"),
-							skillLevel("hitpoints"),
-							skillLevel("ranged"),
-							skillLevel("prayer"),
-							skillLevel("magic")
-						), 0, 0];
-					}
 
 					// Wanted Skills
 					for (var i = 0; i < wantedSkills.length; i++) {
@@ -67,14 +49,22 @@ module.exports = function(request) {
 
 						// Add to skills
 						skills[wantedSkills[i]] = [
-							parseInt(skill[1]), // Level
+							parseFloat(skill[1]), // Level
 							parseInt(skill[0]), // XP
 							parseInt(skill[2]), // Rank
 						];
 					}
 
-					return callback(skills);
+					return callback(playerName, skills);
 				}
+			);
+		},
+
+		get: function(args, callback) {
+			return this.getEx(
+				this._findPlayerName(args),
+				args.slice(playerName.split(" ").length),
+				callback
 			);
 		},
 
@@ -85,13 +75,25 @@ module.exports = function(request) {
 				output += "**" + skill.title() + ":** " +
 					skills[skill][0].toString() + " | ";
 
-			if (output.length > 2)
-				output = output.slice(0, -3);
-
-			return output;
+			return output.slice(0, -3);
 		},
 
-		calcCombat: function(a, d, s, h, r, p, m) {
+		getCombat: function(tokens) {
+			var getLevel = function(name) {
+				return parseInt(
+					tokens[skillsList.indexOf(name)].split(",")[1]
+				);
+			};
+
+			return this._calcCombat(
+				getLevel("attack"), getLevel("defence"),
+				getLevel("strength"), getLevel("hitpoints"),
+				getLevel("ranged"), getLevel("prayer"),
+				getLevel("magic")
+			);
+		},
+
+		_calcCombat: function(a, d, s, h, r, p, m) {
 			// http://2007.runescape.wikia.com/wiki/Combat_level
 			return ((0.25 * (d + h + Math.floor(p / 2))) + (Math.max(
 				a + s, // Melee
@@ -100,25 +102,25 @@ module.exports = function(request) {
 			) * 0.325)).toFixed(1);
 		},
 
-		_findUsername: function(args) {
+		_findPlayerName: function(args) {
 			searching = true;
-			username = args[0];
+			playerName = args[0];
 
-			// Keep adding onto username as long as
+			// Keep adding onto playerName as long as
 			// next element is not a skill name
 			for (var i = 1; i < args.length; i++) {
 				if (!searching)
-					return username.trim();
+					return playerName.trim();
 
 				if(skillsList.indexOf(args[i]) < 0) {
-					username += " " + args[i];
+					playerName += " " + args[i];
 					continue;
 				}
 
 				searching = false;
 			}
 
-			return username.trim();
+			return playerName.trim();
 		}
 	};
 }

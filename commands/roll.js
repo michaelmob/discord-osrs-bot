@@ -1,7 +1,7 @@
 module.exports = function(modules) {
 	return {
 		call: ["roll"],
-		help: "::roll [number] / Random number generator.",
+		help: "::roll [int[-int]] / Random number generator.",
 		
 		func: function(opts, command) {
 			var val1 = parseInt(command.args[0] || 100);

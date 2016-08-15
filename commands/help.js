@@ -1,5 +1,5 @@
 module.exports = function(modules) {
-	startText = "List of Commands:\n ```";
+	startText = "\n**List of Commands:** ```";
 	endText = "```"
 
 	return {

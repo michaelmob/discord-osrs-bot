@@ -23,7 +23,14 @@ module.exports = function(request, fuse) {
 			// Amount multiplication
 			if (item.includes("*")) {
 				item = item.split("*");
-				amount = parseInt(item[1].trim() || 1);
+				var amountStr = (item[1].trim() || 1).toString().toLowerCase();
+				amount = this.numbersOnly(amountStr);
+
+				if (amountStr.includes("m"))
+					amount = amount * 1000000;
+				else if (amountStr.includes("k"))
+					amount = amount * 1000;
+
 				item = item[0];
 			}
 
@@ -45,6 +52,10 @@ module.exports = function(request, fuse) {
 					);
 				}
 			);
+		},
+
+		numbersOnly: function(number) {
+			return number.replace(/[^0-9]/g, "");
 		},
 
 		_formatNumber: function(number) {

@@ -19,13 +19,12 @@ var Modules = {
 	chat: require("./chat.js")(Bot),
 	player: require("./player.js")(Request),
 	item: require("./item.js")(Request, Fuse),
+	commands: {},
 	helpText: ""
 }
 
 // Commands
 var CommandFiles = Fs.readdirSync("commands").filter((f) => f.endsWith(".js"));
-var CommandsList = [];
-var Commands = {};
 
 for (var i = CommandFiles.length - 1; i >= 0; i--) {
 	// Import
@@ -41,13 +40,13 @@ for (var i = CommandFiles.length - 1; i >= 0; i--) {
 
 	// Add calls to Commands
 	for (var j = func.call.length - 1; j >= 0; j--) {
-		Commands[func.call[j]] = func;
+		Modules.commands[func.call[j]] = func;
 	}
 
 	Modules["helpText"] += func.help + "\n";
 }
 
-CommandsList = Object.keys(Commands);
+CommandsList = Object.keys(Modules.commands);
 
 // Listeners
 Bot.on("ready", function() {
@@ -55,13 +54,25 @@ Bot.on("ready", function() {
 });
 
 Bot.on("message", function(user, userID, channelID, message, event) {
-	if(!message.startsWith("::"))
-		return; // Not a valid command
+	// User is talking to bot
+	/*if(message.startsWith("<@" + Bot.id +">")) {
+		Modules.chat.sendMessage({ to: channelID, userID: userID }, "Hey");
+	}*/
 
+	// Command has prefixer
+	if(!message.startsWith("::"))
+		return;
+
+	// Parse
 	var command = Modules.utils.parseCommand(message);
 
+	// Validate
 	if (CommandsList.indexOf(command.value) < 0)
-		return; // Not a valid command
+		return;
 
-	Commands[command.value].func({ to: channelID, userID: userID }, command);
+	// Log
+	console.log("\"::" + command.value + " " + command.args.join(" ") + "\" from " + user);
+
+	// Run
+	Modules.commands[command.value].func({ to: channelID, userID: userID }, command);
 });
