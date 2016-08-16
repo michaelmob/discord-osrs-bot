@@ -92,7 +92,7 @@ module.exports = function(request, fuse) {
 		* Remove all non-numeric characters
 		*/
 		_numbersOnly: function(number) {
-			return number.replace(/[^0-9]/g, "");
+			return number.replace(/[^0-9.]/g, "");
 		},
 
 		/*
@@ -101,6 +101,8 @@ module.exports = function(request, fuse) {
 		_expandNumber: function(number) {
 			var numberStr = number.toString().trim().toLowerCase();
 			number = this._numbersOnly(numberStr);
+
+			console.log(number);
 
 			// Multiply number by millions
 			if (numberStr.includes("m"))
