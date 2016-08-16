@@ -102,8 +102,6 @@ module.exports = function(request, fuse) {
 			var numberStr = number.toString().trim().toLowerCase();
 			number = this._numbersOnly(numberStr);
 
-			console.log(number);
-
 			// Multiply number by millions
 			if (numberStr.includes("m"))
 				number = number * 1000000;
