@@ -46,7 +46,7 @@ module.exports = function(request, fuse) {
 					return;
 
 				var result = JSON.parse(body)["item"];
-				item["alch"] = Math.round(item["store"]) * .6;
+				item["alch"] = parseInt(Math.round(item["store"]) * .6);
 				item["price"] = _this._expandNumber(result["current"]["price"]);
 				item["amount"] = amount;
 				item["description"] = result["description"];
@@ -77,7 +77,7 @@ module.exports = function(request, fuse) {
 					return;
 
 				var result = JSON.parse(body);
-				item["alch"] = Math.round(item["store"]) * .6;
+				item["alch"] = parseInt(Math.round(item["store"]) * .6);
 				item["price"] = result["overall"];
 				item["amount"] = amount;
 				item["icon"] = "http://cdn.rsbuddy.com/items/" + item["id"] + ".png"
