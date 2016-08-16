@@ -1,21 +1,26 @@
+/*
+* Generate a random number between two specified integers.
+*/
 module.exports = function(modules) {
 	return {
 		call: ["roll"],
 		help: "::roll [int[-int]] / Random number generator.",
 		
 		func: function(opts, command) {
-			var val1 = parseInt(command.args[0] || 100);
-			var val2 = 0;
+			// Combine args to be split by hyphens, so that both
+			// "::roll 1-100" and "::roll 1 100" can be both be read
+			var values = command.args.join("-").split("-");
 
-			if(command.args.length > 1)
-				val2 = parseInt(command.args[1]);
-			else {
-				val2 = val1;
-				val1 = 0;
-			}
+			// Parse values
+			var fromValue = parseInt(values[0]) || 1;
+			var toValue = parseInt(values[1]) || 100;
 
-			modules.chat.sendMessage(opts, "Rolling: " + val1 + "-" + val2 +
-				" | Result: **" + modules.utils.randomNumber(val1, val2) + "**"
+			// Process and send result
+			var result = modules.utils.randomNumber(fromValue, toValue);
+
+			modules.chat.sendMessage(opts,
+				"Rolling:", fromValue + "-" + toValue,
+				"| Result:", "**" + result + "**"
 			);
 		}
 	};

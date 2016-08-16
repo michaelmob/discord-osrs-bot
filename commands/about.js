@@ -1,3 +1,6 @@
+/*
+* About the bot
+*/
 module.exports = function(modules) {
 	return {
 		call: ["about"],
@@ -5,7 +8,9 @@ module.exports = function(modules) {
 		
 		func: function(opts, command) {
 			modules.chat.sendMessage(opts,
-				"https://github.com/thetarkus/discord-osrs-bot/"
+				"\n**Oldschool Runescape Discord Bot**\n",
+				"Version:", modules.bot.version, "\n",
+				"Source: https://github.com/thetarkus/discord-osrs-bot/"
 			);
 		}
 	};

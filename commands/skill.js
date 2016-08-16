@@ -1,4 +1,5 @@
 module.exports = function(modules) {
+
 	var skills = [
 		["attack", "atk", "att"],
 		["strength", "str"],
@@ -27,6 +28,16 @@ module.exports = function(modules) {
 		["combat", "cmb"],
 	];
 
+	var nameToSkill = function(name) {
+		for (var i = 0; i < skills.length; i++) {
+			for (var j = 0; j < skills[i].length; j++) {
+				if(skills[i][j].indexOf(name) > -1)
+					return skills[i][0];
+			}
+		}
+		return null;
+	};
+
 	calls = [];
 	
 	for (var i = 0; i < skills.length; i++) {
@@ -41,7 +52,7 @@ module.exports = function(modules) {
 
 		func: function(opts, command) {
 			var playerName = command.args.join(" ");
-			var skillName = this._nameToSkill(command.value);
+			var skillName = nameToSkill(command.value);
 			modules.player.getEx(playerName, [skillName], function(playerName, skills) {
 				if(skills == false)
 					return modules.chat.sendMessagePlayer(
@@ -57,17 +68,6 @@ module.exports = function(modules) {
 					" | **EXP:** " + f(skills[skillName][2])
 				);
 			});
-		},
-
-		_nameToSkill: function(name) {
-			for (var i = 0; i < skills.length; i++) {
-				for (var j = 0; j < skills[i].length; j++) {
-					if(skills[i][j].indexOf(name) > -1)
-						return skills[i][0];
-				}
-			}
-
-			return null;
 		}
 	};
 }

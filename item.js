@@ -3,6 +3,10 @@ module.exports = function(request, fuse) {
 	var listItems = [];
 
 	for(var item in dictItems) {
+		// Ignore broken Barrow's items
+		if (dictItems[item]["name"].slice(-2) == " 0")
+			continue;
+
 		listItems.push({
 			"id": item,
 			"name": dictItems[item]["name"],
@@ -13,26 +17,20 @@ module.exports = function(request, fuse) {
 	var fuzzy = new fuse(listItems, { keys: ["name"] });
 
 	return {
+		/*
+		* Get Item with fuzzy search
+		*/
 		get: function(item) {
 			return fuzzy.search(item)[0];
 		},
 
-		market: function(item, callback) {
-			amount = 1;
-
-			// Amount multiplication
-			if (item.includes("*")) {
-				item = item.split("*");
-				var amountStr = (item[1].trim() || 1).toString().toLowerCase();
-				amount = this.numbersOnly(amountStr);
-
-				if (amountStr.includes("m"))
-					amount = amount * 1000000;
-				else if (amountStr.includes("k"))
-					amount = amount * 1000;
-
-				item = item[0];
-			}
+		/*
+		* Fetch data from Grand Exchange API
+		*/
+		grandExchangeData: function(item, callback) {
+			itemAmount = this._itemAmount(item);
+			item = itemAmount[0];
+			amount = itemAmount[1];
 
 			// Fuzzy search, find item
 			item = this.get(item);
@@ -40,48 +38,87 @@ module.exports = function(request, fuse) {
 				return callback("Item not found!");
 
 			// Fetch market data
+			url = "http://services.runescape.com/m=itemdb_oldschool/api/catalogue/detail.json?item=" + item["id"];
 			_this = this;
-			request.get(
-				"https://api.rsbuddy.com/grandExchange?a=guidePrice&i=" + item["id"],
-				function (error, response, body) {
-					if(response.statusCode == 404 || response.statusCode == 500)
-						return;
 
-					return callback(
-						_this._formatMarketData(item, JSON.parse(body), amount)
-					);
-				}
-			);
+			request.get(url, function(err, resp, body) {
+				if(resp.statusCode == 404 || resp.statusCode == 500)
+					return;
+
+				var result = JSON.parse(body)["item"];
+				item["alch"] = Math.round(item["store"]) * .6;
+				item["price"] = _this._expandNumber(result["current"]["price"]);
+				item["amount"] = amount;
+				item["description"] = result["description"];
+				item["icon"] = result["icon_large"];
+
+				return callback(item);
+			});
 		},
 
-		numbersOnly: function(number) {
+		/*
+		* Fetch data from RSBuddy API
+		*/
+		rsbuddyData: function(item, callback) {
+			var itemAmount = this._itemAmount(item);
+			var amount = itemAmount[1];
+			item = itemAmount[0];
+
+			// Fuzzy search, find item
+			item = this.get(item);
+			if(item == undefined)
+				return callback("Item not found!");
+
+			// Fetch market data
+			var url = "https://api.rsbuddy.com/grandExchange?a=guidePrice&i=" + item["id"];
+			var _this = this;
+			request.get(url, function(err, resp, body) {
+				if(resp.statusCode == 404 || resp.statusCode == 500)
+					return;
+
+				var result = JSON.parse(body);
+				item["alch"] = Math.round(item["store"]) * .6;
+				item["price"] = result["overall"];
+				item["amount"] = amount;
+				item["icon"] = "http://cdn.rsbuddy.com/items/" + item["id"] + ".png"
+				item["buying"] = result["buying"];
+				item["selling"] = result["selling"];
+
+				return callback(item);
+			});
+		},
+
+		/*
+		* Remove all non-numeric characters
+		*/
+		_numbersOnly: function(number) {
 			return number.replace(/[^0-9]/g, "");
 		},
 
-		_formatNumber: function(number) {
-			return number.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
+		/*
+		* Expand number such as "3.4m" to "3400000" 
+		*/
+		_expandNumber: function(number) {
+			var numberStr = number.toString().trim().toLowerCase();
+			number = this._numbersOnly(numberStr);
+
+			// Multiply number by millions
+			if (numberStr.includes("m"))
+				number = number * 1000000;
+
+			// Multiply number by thousands
+			else if (numberStr.includes("k"))
+				number = number * 1000;
+
+			return parseFloat(number);
 		},
 
-		_formatMarketData: function(localItem, item, amount) {
-			// Name
-			var result = this._formatNumber(amount) + " x **" + localItem["name"] + "** ";
-
-			// Image
-			result += "http://cdn.rsbuddy.com/items/" + localItem["id"] + ".png \n";
-
-			// Prices
-			alchValue = this._formatNumber(Math.round(localItem["store"] * .6));
-			buyValue = this._formatNumber(item["buying"] * amount);
-			sellValue = this._formatNumber(item["selling"] * amount);
-			averageValue = this._formatNumber(item["overall"] * amount);
-
-			// Output
-			result += "**Alch:** " + alchValue + " gp | ";
-			result += "**Buy:** " + buyValue + " gp | ";
-			result += "**Sell:** " + sellValue + " gp | ";
-			result += "**Avg:** " + averageValue + " gp | ";
-
-			return result;
+		/*
+		* Split by asterisk to get Item name and Item amount
+		*/
+		_itemAmount: function(item) {
+			var values = item.replace(" x ", "*").split("*");
+			return [values[0], parseInt(values[1]) || 1];
 		}
 	};
 }

@@ -1,3 +1,6 @@
+/*
+* Choose random index from list split by commas
+*/
 module.exports = function(modules) {
 	return {
 		call: ["choose", "choice", "pick", "select"],
@@ -10,8 +13,8 @@ module.exports = function(modules) {
 			var choices = command.args.join(" ").split(",");
 			var index = modules.utils.randomNumber(0, choices.length - 1);
 
-			modules.chat.sendMessage(opts, "I choose: " +
-				"**" + choices[index].trim() + "**"
+			modules.chat.sendMessage(opts,
+				"I choose:", "**" + choices[index].trim() + "**"
 			);
 		}
 	};

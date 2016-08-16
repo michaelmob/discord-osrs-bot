@@ -1,3 +1,6 @@
+/*
+* Fetch levels of a player
+*/
 module.exports = function(modules) {
 	return {
 		call: ["levels", "level", "lvls", "lvl", "stats", "stat", "skills", "skill"],
@@ -5,6 +8,7 @@ module.exports = function(modules) {
 
 		func: function(opts, command) {
 			modules.player.get(command.args, function(playerName, skills) {
+				// No skills returned means no players were found
 				if(skills == false)
 					return modules.chat.sendMessagePlayer(
 						opts, playerName, "Player not found!"

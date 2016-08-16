@@ -7,7 +7,6 @@ module.exports = function(bot) {
 		formatNumber: function(number) {
 			return number.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
 		},
-
 		randomNumber: function(minimum, maximum) {
 			return Math.floor(Math.random() * (maximum - minimum + 1) + minimum);
 		},

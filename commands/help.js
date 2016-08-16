@@ -1,3 +1,6 @@
+/*
+* Send a link to the Grand Exchange's website for an item
+*/
 module.exports = function(modules) {
 	startText = "\n**List of Commands:** ```";
 	endText = "```"
@@ -6,7 +9,9 @@ module.exports = function(modules) {
 		call: ["help"],
 		help: "::help / List all commands.",
 		func: function(opts, command) {
-			modules.chat.sendMessage(opts, startText + modules.helpText + endText);
+			modules.chat.sendMessage(
+				opts, startText + modules.helpText + endText
+			);
 		}
 	};
 }

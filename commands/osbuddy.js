@@ -1,7 +1,10 @@
+/*
+* Fetch levels of a player
+*/
 module.exports = function(modules) {
 	return {
-		call: ["osbuddy"],
-		help: "::osbuddy [item] / Link to RSBuddy's data for an item.",
+		call: ["osbuddy", "osb"],
+		help: "::osbuddy [item] / Link to the RSBuddy's market site for an item.",
 		
 		func: function(opts, command) {
 			var item = modules.item.get(command.args.join(" "));

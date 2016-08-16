@@ -20,7 +20,9 @@ var Modules = {
 	player: require("./player.js")(Request),
 	item: require("./item.js")(Request, Fuse),
 	commands: {},
-	helpText: ""
+	bot: {
+		version: "1.2"
+	}
 }
 
 // Commands
