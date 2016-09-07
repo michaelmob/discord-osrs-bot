@@ -2,15 +2,17 @@
 * Send a link to the Grand Exchange's website for an item
 */
 module.exports = function(modules) {
-	startText = "\n**List of Commands:** ```";
+	startText = "```";
 	endText = "```"
 
 	return {
-		call: ["help"],
-		help: "::help / List all commands.",
+		alias: ["help"],
+		example: "::help",
+		description: "List all of the bots commands.",
+
 		func: function(opts, command) {
-			modules.chat.sendMessage(
-				opts, startText + modules.helpText + endText
+			modules.chat.sendPrivateMessage(
+				opts, startText + modules.database["help-text"] + endText
 			);
 		}
 	};

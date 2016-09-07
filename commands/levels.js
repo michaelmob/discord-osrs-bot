@@ -3,14 +3,15 @@
 */
 module.exports = function(modules) {
 	return {
-		call: ["levels", "level", "lvls", "lvl", "stats", "stat", "skills", "skill"],
-		help: "::levels [username] [skill [skill [skill...]]] / Show skill levels of a player.",
+		alias: ["levels", "level", "lvls", "lvl", "stats", "stat", "skills", "skill"],
+		example: "::levels [player name] [skill [skill [skill...]]]",
+		description: "Show skill levels of a player.",
 
 		func: function(opts, command) {
 			modules.player.get(command.args, function(playerName, skills) {
 				// No skills returned means no players were found
 				if(skills == false)
-					return modules.chat.sendMessagePlayer(
+					return modules.chat.sendMessageUser(
 						opts, playerName, "Player not found!"
 					);
 
@@ -19,7 +20,7 @@ module.exports = function(modules) {
 				if (result.length < 1)
 					return;
 
-				modules.chat.sendMessagePlayer(
+				modules.chat.sendMessageUser(
 					opts, playerName, modules.player.skillsToString(skills)
 				);
 			});

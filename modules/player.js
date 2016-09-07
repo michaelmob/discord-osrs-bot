@@ -1,4 +1,6 @@
-module.exports = function(request) {
+var Request = require("request");
+
+module.exports = function() {
 	var skillsList = [
 		"total", "attack", "defence", "strength", "hitpoints", "ranged", "prayer",
 		"magic", "cooking", "woodcutting", "fletching", "fishing", "firemaking",
@@ -12,6 +14,10 @@ module.exports = function(request) {
 	}
 
 	return {
+		/*
+		* Get specific skills; if no skills are provided then default to
+		* combat skills.
+		*/
 		getEx: function(playerName, wantedSkills, callback) {
 			// Show combat skills if none were specified
 			if(wantedSkills.length < 1) {
@@ -22,7 +28,7 @@ module.exports = function(request) {
 			}
 			
 			_this = this;
-			request.get(
+			Request.get(
 				"http://services.runescape.com/m=hiscore_oldschool/" + 
 					"index_lite.ws?player=" + playerName.replace(/\ /g, "+"),
 
@@ -60,6 +66,9 @@ module.exports = function(request) {
 			);
 		},
 
+		/*
+		* Fetch levels for a player
+		*/
 		get: function(args, callback) {
 			return this.getEx(
 				this._findPlayerName(args),
@@ -68,6 +77,9 @@ module.exports = function(request) {
 			);
 		},
 
+		/*
+		* Output skills dictionary in a readable format
+		*/
 		skillsToString: function(skills) {
 			var output = "";
 
@@ -78,6 +90,9 @@ module.exports = function(request) {
 			return output.slice(0, -3);
 		},
 
+		/*
+		* Find combat level from a player's stats
+		*/
 		getCombat: function(tokens) {
 			var getLevel = function(name) {
 				return parseInt(
@@ -93,6 +108,10 @@ module.exports = function(request) {
 			);
 		},
 
+
+		/*
+		* PRIVATE / Calculate combat level
+		*/
 		_calcCombat: function(a, d, s, h, r, p, m) {
 			// http://2007.runescape.wikia.com/wiki/Combat_level
 			return ((0.25 * (d + h + Math.floor(p / 2))) + (Math.max(
@@ -102,6 +121,10 @@ module.exports = function(request) {
 			) * 0.325)).toFixed(1);
 		},
 
+
+		/*
+		* Find player name in arguments
+		*/
 		_findPlayerName: function(args) {
 			searching = true;
 			playerName = args[0];

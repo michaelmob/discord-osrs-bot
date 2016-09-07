@@ -1,7 +1,11 @@
+/*
+* Send a link to the grand exchange page for an item
+*/
 module.exports = function(modules) {
 	return {
-		call: ["ge", "grandexchange"],
-		help: "::wiki [item] / Link to the grand exchange page for an item.",
+		alias: ["ge", "grandexchange"],
+		example: "::ge [item name]",
+		description: "Link to the grand exchange page for an item.",
 		
 		func: function(opts, command) {
 			command = command.args.join(" ");

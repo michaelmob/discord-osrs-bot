@@ -1,10 +1,11 @@
 /*
-* Choose random index from list split by commas
+* Choose random index from a list that is split by commas
 */
 module.exports = function(modules) {
 	return {
-		call: ["choose", "choice", "pick", "select"],
-		help: "::choose [val1], [val2], [val3...] / Choose randomly from list.",
+		alias: ["choose", "choice", "pick", "select"],
+		example: "::choose [value][, [value], [value...]]",
+		description: "Choose randomly from list.",
 		
 		func: function(opts, command) {
 			if(command.args.length < 1)

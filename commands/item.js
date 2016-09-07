@@ -21,8 +21,9 @@ module.exports = function(modules) {
 	};
 
 	return {
-		call: ["item", "price", "pc"],
-		help: "::item [name] / Show grand exchange data for an item.",
+		alias: ["item", "price", "pc"],
+		example: "::item [item name]",
+		description: "Show grand exchange data for an item.",
 
 		func: function(opts, command) {
 			var item = command.args.join(" ");
@@ -30,11 +31,11 @@ module.exports = function(modules) {
 			modules.item.grandExchangeData(item, function(data) {
 				modules.chat.sendMessage(opts,
 					data["icon"] + "\n\n",
-					"**" + data["name"] + "**\n",
+					"**" + data["name"] + "**",
 					"*" + data["description"] + "*", "\n\n",
 					
-					"**Alch:**", itemValue(data["alch"], data["amount"]), "\n",
-					"**Price:**", itemValue(data["price"], data["amount"])
+					"**Price:**", itemValue(data["price"], data["amount"]), "\n",
+					"**Alch:**", itemValue(data["alch"], data["amount"])
 				);
 			});
 		},

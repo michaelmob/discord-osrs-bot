@@ -1,33 +1,43 @@
-// Requirements
-var Discord = require("discord.io");
+/* Imports */
 var Request = require("request");
+var Discord = require("discord.io");
 var Fuse = require("fuse.js");
 var Fs = require("fs");
 
-// User Variables
+
+/* User Variables */
 var Variables = require("./variables")();
 
-// Bot
+
+/* Bot */
 var Bot = new Discord.Client({
 	token: Variables.TOKEN,
 	autorun: true
 });
 
-// Modules
-var Modules = {
-	utils: require("./utils.js")(),
-	chat: require("./chat.js")(Bot),
-	player: require("./player.js")(Request),
-	item: require("./item.js")(Request, Fuse),
-	commands: {},
-	bot: {
-		version: "1.2"
-	}
-}
 
-// Commands
+/* Modules */
+var Modules = {
+	utils: require("./modules/utils.js")(),
+	chat: require("./modules/chat.js")(Bot),
+	player: require("./modules/player.js")(),
+	item: require("./modules/item.js")(),
+	database: require("./modules/database.js")()
+};
+
+
+/* Database */
+Modules.database.data.statistics = {};
+Modules.database.data.channels = {};
+Modules.database.load();
+Modules.database.autosave();
+
+
+/* Commands */
+var Commands = {};
 var CommandFiles = Fs.readdirSync("commands").filter((f) => f.endsWith(".js"));
 
+// Loop through each js file in ./commands/ and import it as a command
 for (var i = CommandFiles.length - 1; i >= 0; i--) {
 	// Import
 	var name = CommandFiles[i].slice(0, -3);
@@ -41,27 +51,26 @@ for (var i = CommandFiles.length - 1; i >= 0; i--) {
 	var func = func(Modules);
 
 	// Add calls to Commands
-	for (var j = func.call.length - 1; j >= 0; j--) {
-		Modules.commands[func.call[j]] = func;
+	for (var j = func.alias.length - 1; j >= 0; j--) {
+		Commands[func.alias[j]] = func;
 	}
 
-	Modules["helpText"] += func.help + "\n";
+	Modules.database["help-text"] += func.example + " -- " + func.description + "\n";
 }
 
-CommandsList = Object.keys(Modules.commands);
+// Get all commands and aliases 
+CommandsList = Object.keys(Commands);
 
-// Listeners
+
+/* Listeners */
 Bot.on("ready", function() {
 	console.log(Bot.username + " - (" + Bot.id + ")");
 });
 
-Bot.on("message", function(user, userID, channelID, message, event) {
-	// User is talking to bot
-	/*if(message.startsWith("<@" + Bot.id +">")) {
-		Modules.chat.sendMessage({ to: channelID, userID: userID }, "Hey");
-	}*/
 
-	// Command has prefixer
+// Normal Message
+Bot.on("message", function(user, userID, channelID, message, event) {
+	// Command has prefix
 	if(!message.startsWith("::"))
 		return;
 
@@ -72,9 +81,24 @@ Bot.on("message", function(user, userID, channelID, message, event) {
 	if (CommandsList.indexOf(command.value) < 0)
 		return;
 
-	// Log
-	console.log("\"::" + command.value + " " + command.args.join(" ") + "\" from " + user);
-
 	// Run
-	Modules.commands[command.value].func({ to: channelID, userID: userID }, command);
+	Commands[command.value].func({
+		to: channelID, userID: userID
+	}, command);
+
+	// Create dictionary for ChannelID
+	if(!Modules.database.data.channels[channelID]) {
+		Modules.database.data.channels[channelID] = {};
+		Modules.database.data.statistics["talked-to-count"] += 1
+	}
+
+	// Delete message if option is set
+	if(Modules.database.data.channels[channelID]["delete-messages"] == true) {
+		Bot.deleteMessage({
+			channelID: channelID, messageID: event.d.id
+		});
+		Modules.database.data.statistics["delete-count"] += 1
+	}
+
+	Modules.database.data.statistics["commands-received-count"] += 1
 });

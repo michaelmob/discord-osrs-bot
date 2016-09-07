@@ -3,8 +3,9 @@
 */
 module.exports = function(modules) {
 	return {
-		call: ["roll"],
-		help: "::roll [int[-int]] / Random number generator.",
+		alias: ["roll"],
+		example: "::roll [int[-int]]",
+		description: "Random number generator.",
 		
 		func: function(opts, command) {
 			// Combine args to be split by hyphens, so that both
@@ -14,6 +15,17 @@ module.exports = function(modules) {
 			// Parse values
 			var fromValue = parseInt(values[0]) || 1;
 			var toValue = parseInt(values[1]) || 100;
+
+			// Single input; 1-[value]
+			if (values.length < 2) {
+				toValue = fromValue;
+				fromValue = 1;
+			}
+
+			// Switch numbers if fromValue is larger than toValue
+			else if (toValue != 0 && fromValue > toValue) {
+				fromValue = [toValue, toValue = fromValue][0];
+			}
 
 			// Process and send result
 			var result = modules.utils.randomNumber(fromValue, toValue);

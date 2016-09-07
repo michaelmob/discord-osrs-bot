@@ -39,3 +39,4 @@ jspm_packages
 
 # Private
 variables.js
+database.json

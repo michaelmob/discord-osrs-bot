@@ -1,10 +1,11 @@
 /*
-* Fetch levels of a player
+* Send a link to the OSBuddy page for an item
 */
 module.exports = function(modules) {
 	return {
-		call: ["osbuddy", "osb"],
-		help: "::osbuddy [item] / Link to the RSBuddy's market site for an item.",
+		alias: ["osbuddy", "osb"],
+		example: "::osbuddy [item name]",
+		description: "Link to the RSBuddy's market site for an item.",
 		
 		func: function(opts, command) {
 			var item = modules.item.get(command.args.join(" "));
