@@ -28,7 +28,7 @@ var functions = {
 	* 'arg' is the last argument in 'args'
 	*/
 	parseCommand: function(message) {
-		message = message.substring(2).split(" ");
+		message = message.trim().substring(2).split(" ");
 		args = message.slice(1);
 
 		return {
