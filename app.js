@@ -6,7 +6,7 @@ var Fs = require("fs");
 
 
 /* User Variables */
-var Variables = require("./variables")();
+var Variables = require("./variables.js")();
 
 
 /* Bot */
