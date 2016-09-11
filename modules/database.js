@@ -32,7 +32,7 @@ module.exports = function() {
 			var keys = Object.keys(defaults);
 
 			for (var i = keys.length - 1; i >= 0; i--)
-				if(!(keys[i] in this.data))
+				if(!(keys[i] in this.data.statistics))
 					this.data.statistics[keys[i]] = 0;
 		},
 
@@ -40,7 +40,7 @@ module.exports = function() {
 		* Save database to DatabaseFile
 		*/
 		save: function() {
-			Fs.writeFile(DatabaseFile, JSON.stringify(this.data), function (err) {
+			Fs.writeFile("./" + DatabaseFile, JSON.stringify(this.data), function (err) {
 				if (err) return console.log(err);
 				console.log("Database saved at " + Date().toString());
 			});

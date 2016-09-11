@@ -1,0 +1,28 @@
+#!/usr/bin/phantomjs
+var page = require("webpage").create();
+var fs = require("fs");
+
+url = "https://rsbuddy.com/exchange/names.json";
+path = "names.json";
+
+page.settings.userAgent = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:49.0) Gecko/20100101 Firefox/49.0";
+page.open(url, function(status) {
+	setTimeout(function() {
+
+		try {
+			JSON.parse(page.plainText);
+		} catch (e) {
+			console.log("Error: Data was not valid JSON");
+			phantom.exit();
+		}
+
+		try {
+			fs.write(path, page.plainText, "w");
+		} catch (e) {
+			console.log("Error: Could name save names.json");
+		}
+		
+		console.log("Success: File '" + path + "' updated")
+		phantom.exit();
+	}, 6000);
+});
